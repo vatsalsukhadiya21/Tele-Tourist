@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile - Tele Tourist</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .profile-img-placeholder {
+            width: 150px;
+            height: 150px;
+            background-color: #e9ecef;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            color: #6c757d;
+            margin: 0 auto;
+        }
+    </style>
+</head>
+<body class="bg-light">
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="index.html">Tele Tourist</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto" id="auth-links">
+                    <!-- Nav links -->
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container py-5">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <!-- Profile Display Section -->
+                <div class="card shadow-sm mb-4" id="profile-display">
+                    <div class="card-body text-center p-5">
+                        <div id="profile-image-container" class="mb-3">
+                            <div class="profile-img-placeholder">
+                                <span id="profile-initials">U</span>
+                            </div>
+                        </div>
+                        <h2 class="fw-bold mb-1" id="display-name">Loading...</h2>
+                        <p class="text-muted mb-3">@<span id="display-username">loading</span></p>
+                        <p class="mb-3" id="display-bio"></p>
+                        
+                        <div id="owner-info" class="d-none text-muted small mb-4">
+                            <p class="mb-1">Email: <span id="display-email"></span></p>
+                        </div>
+                        
+                        <div id="owner-controls" class="d-none mt-4">
+                            <button class="btn btn-outline-primary px-4 me-2" id="edit-profile-btn">Edit Profile</button>
+                            <button class="btn btn-outline-danger px-4" id="profile-logout-btn">Logout</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Profile Edit Section -->
+                <div class="card shadow-sm d-none" id="profile-edit-form-container">
+                    <div class="card-body p-4">
+                        <h4 class="mb-4">Edit Profile</h4>
+                        <div id="edit-message-container"></div>
+                        <form id="edit-profile-form">
+                            <div class="mb-3">
+                                <label for="edit-fullName" class="form-label">Full Name</label>
+                                <input type="text" class="form-control" id="edit-fullName" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="edit-username" class="form-label">Username</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">@</span>
+                                    <input type="text" class="form-control" id="edit-username" required pattern="[a-zA-Z0-9_]{3,20}" title="3-20 characters, letters, numbers, and underscores only">
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <label for="edit-bio" class="form-label">Bio</label>
+                                <textarea class="form-control" id="edit-bio" rows="3"></textarea>
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label text-muted">Email (Cannot be changed here)</label>
+                                <input type="email" class="form-control" id="edit-email" disabled>
+                            </div>
+                            <div class="d-flex justify-content-end gap-2 mt-4">
+                                <button type="button" class="btn btn-secondary" id="cancel-edit-btn">Cancel</button>
+                                <button type="submit" class="btn btn-primary" id="save-profile-btn">Save Changes</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                
+                <!-- Error State -->
+                <div class="alert alert-danger d-none mt-4" id="profile-error">
+                    Profile not found.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- jQuery and Bootstrap Bundle with Popper -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/profile.js"></script>
+</body>
+</html>

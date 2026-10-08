@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Story Details - Tele Tourist</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .story-content { white-space: pre-wrap; font-size: 1.1rem; line-height: 1.7; }
+        .author-img { width: 50px; height: 50px; object-fit: cover; border-radius: 50%; background: #e9ecef; display:flex; align-items:center; justify-content:center; color:#6c757d; font-weight:bold;}
+    </style>
+</head>
+<body class="bg-light">
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="index.html">Tele Tourist</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto" id="auth-links">
+                    <!-- Nav links -->
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container py-5">
+        <div id="loading" class="text-center py-5">Loading...</div>
+        <div id="error" class="alert alert-danger d-none"></div>
+
+        <div class="row justify-content-center d-none" id="story-container">
+            <div class="col-md-10 col-lg-8">
+                <div class="card shadow-sm border-0">
+                    <div class="card-body p-4 p-md-5">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <span class="badge bg-primary fs-6" id="story-category">Category</span>
+                            <span class="text-muted" id="story-date">Date</span>
+                        </div>
+                        
+                        <h1 class="fw-bold mb-3" id="story-title">Title</h1>
+                        <h5 class="text-muted mb-4"><i class="bi bi-geo-alt-fill text-primary"></i> <span id="story-location">Location</span></h5>
+
+                        <!-- Author Block -->
+                        <div class="d-flex align-items-center bg-light p-3 rounded mb-4">
+                            <a id="author-link" href="#" class="text-decoration-none text-dark d-flex align-items-center">
+                                <div id="author-img-container" class="me-3"></div>
+                                <div>
+                                    <h6 class="mb-0 fw-bold" id="author-name">Author Name</h6>
+                                    <small class="text-muted" id="author-username">@username</small>
+                                </div>
+                            </a>
+                        </div>
+
+                        <!-- Content -->
+                        <div class="story-content mb-5" id="story-description">
+                            Description...
+                        </div>
+
+                        <!-- Owner Controls -->
+                        <div id="owner-controls" class="d-none border-top pt-4 text-end">
+                            <a href="#" class="btn btn-outline-secondary px-4 me-2" id="edit-btn">Edit Story</a>
+                            <button class="btn btn-outline-danger px-4" id="delete-btn">Delete Story</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div class="modal fade" id="deleteModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Delete Story</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    Are you sure you want to delete this story?
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-danger" id="confirm-delete-btn">Delete</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- jQuery and Bootstrap Bundle with Popper -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/stories.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const storyId = urlParams.get('id');
+            
+            const loading = document.getElementById('loading');
+            const error = document.getElementById('error');
+            const container = document.getElementById('story-container');
+
+            if (!storyId) {
+                loading.classList.add('d-none');
+                error.classList.remove('d-none');
+                error.textContent = 'No story specified.';
+                return;
+            }
+
+            const res = await StoryAPI.getStory(storyId);
+            loading.classList.add('d-none');
+
+            if (res.success) {
+                const story = res.story;
+                container.classList.remove('d-none');
+
+                document.getElementById('story-title').textContent = story.title;
+                document.getElementById('story-location').textContent = story.location;
+                document.getElementById('story-category').textContent = story.category ? story.category.name : 'Uncategorized';
+                document.getElementById('story-date').textContent = formatDate(story.created_at);
+                document.getElementById('story-description').textContent = story.description;
+                
+                // Author
+                document.getElementById('author-name').textContent = story.author.full_name;
+                document.getElementById('author-username').textContent = '@' + story.author.username;
+                document.getElementById('author-link').href = `profile.html?id=${story.author.id}`;
+                
+                const imgContainer = document.getElementById('author-img-container');
+                if (story.author.profile_image_url) {
+                    imgContainer.innerHTML = `<img src="${story.author.profile_image_url}" class="author-img">`;
+                } else {
+                    const initial = story.author.full_name.charAt(0).toUpperCase();
+                    imgContainer.innerHTML = `<div class="author-img">${initial}</div>`;
+                }
+
+                // Check ownership
+                const myUser = Auth.getUser();
+                if (myUser && myUser.id === story.author.id) {
+                    document.getElementById('owner-controls').classList.remove('d-none');
+                    document.getElementById('edit-btn').href = `create-story.html?edit=${story.id}`;
+                    
+                    // Delete setup
+                    const deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
+                    document.getElementById('delete-btn').addEventListener('click', () => deleteModal.show());
+                    
+                    document.getElementById('confirm-delete-btn').addEventListener('click', async () => {
+                        const delBtn = document.getElementById('confirm-delete-btn');
+                        delBtn.disabled = true;
+                        delBtn.textContent = 'Deleting...';
+                        
+                        const delRes = await StoryAPI.deleteStory(story.id);
+                        if (delRes.success) {
+                            window.location.href = 'my-stories.html';
+                        } else {
+                            alert(delRes.message);
+                            delBtn.disabled = false;
+                            delBtn.textContent = 'Delete';
+                            deleteModal.hide();
+                        }
+                    });
+                }
+            } else {
+                error.classList.remove('d-none');
+                error.textContent = res.message || 'Failed to load story.';
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Story - Tele Tourist</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="bg-light">
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand fw-bold" href="index.html">Tele Tourist</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto" id="auth-links">
+                    <!-- Nav links -->
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container py-5">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card shadow-sm">
+                    <div class="card-body p-4">
+                        <h2 class="fw-bold mb-4" id="form-title">Create Story</h2>
+                        <div id="message-container"></div>
+                        <form id="story-form">
+                            <div class="mb-3">
+                                <label for="story-title" class="form-label">Story Title</label>
+                                <input type="text" class="form-control" id="story-title" placeholder="A magical day in..." required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="story-location" class="form-label">Location</label>
+                                <input type="text" class="form-control" id="story-location" placeholder="City, Country" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="story-category" class="form-label">Category</label>
+                                <select class="form-select" id="story-category" required>
+                                    <option value="" disabled selected>Select a category...</option>
+                                </select>
+                            </div>
+                            <div class="mb-4">
+                                <label for="story-description" class="form-label">Description</label>
+                                <textarea class="form-control" id="story-description" rows="6" placeholder="Tell travelers about your experience..." required></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-primary w-100 py-2" id="submit-btn">Publish Story</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- jQuery and Bootstrap Bundle with Popper -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/stories.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            Auth.requireAuth();
+
+            const urlParams = new URLSearchParams(window.location.search);
+            const editId = urlParams.get('edit');
+            const titleEl = document.getElementById('form-title');
+            const submitBtn = document.getElementById('submit-btn');
+            const catSelect = document.getElementById('story-category');
+            const form = document.getElementById('story-form');
+            const msgContainer = document.getElementById('message-container');
+
+            // Load Categories
+            const catRes = await StoryAPI.getCategories();
+            if (catRes.success && catRes.categories) {
+                catRes.categories.forEach(cat => {
+                    const option = document.createElement('option');
+                    option.value = cat.id;
+                    option.textContent = cat.name;
+                    catSelect.appendChild(option);
+                });
+            }
+
+            // Edit Mode
+            if (editId) {
+                titleEl.textContent = 'Edit Story';
+                submitBtn.textContent = 'Update Story';
+
+                const storyRes = await StoryAPI.getStory(editId);
+                if (storyRes.success && storyRes.story) {
+                    const story = storyRes.story;
+                    // Check ownership locally just for UI context
+                    const myUser = Auth.getUser();
+                    if (myUser && myUser.id !== story.author.id) {
+                        window.location.href = 'my-stories.html';
+                        return;
+                    }
+
+                    document.getElementById('story-title').value = story.title;
+                    document.getElementById('story-location').value = story.location;
+                    document.getElementById('story-description').value = story.description;
+                    catSelect.value = story.category.id;
+                } else {
+                    msgContainer.innerHTML = '<div class="alert alert-danger">Story not found.</div>';
+                    form.style.display = 'none';
+                }
+            }
+
+            form.addEventListener('submit', async (e) => {
+                e.preventDefault();
+
+                const title = document.getElementById('story-title').value;
+                const location = document.getElementById('story-location').value;
+                const description = document.getElementById('story-description').value;
+                const categoryId = catSelect.value;
+
+                submitBtn.disabled = true;
+                submitBtn.textContent = 'Saving...';
+                msgContainer.innerHTML = '';
+
+                let res;
+                if (editId) {
+                    res = await StoryAPI.updateStory(editId, { title, location, description, categoryId });
+                } else {
+                    res = await StoryAPI.createStory({ title, location, description, categoryId });
+                }
+
+                if (res.success) {
+                    window.location.href = `story.html?id=${res.story.id}`;
+                } else {
+                    msgContainer.innerHTML = `<div class="alert alert-danger">${res.message}</div>`;
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = editId ? 'Update Story' : 'Publish Story';
+                }
+            });
+        });
+    </script>
+</body>
+</html>
