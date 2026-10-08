@@ -8,6 +8,7 @@ const authRoutes = require('./src/routes/authRoutes');
 const profileRoutes = require('./src/routes/profileRoutes');
 const storyRoutes = require('./src/routes/storyRoutes');
 const categoryRoutes = require('./src/routes/categoryRoutes');
+const exploreRoutes = require('./src/routes/exploreRoutes');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -21,6 +22,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/profile', profileRoutes);
 app.use('/api/stories', storyRoutes);
 app.use('/api/categories', categoryRoutes);
+app.use('/api/explore', exploreRoutes);
 
 // Basic health-check route
 app.get('/api/health', (req, res) => {

@@ -75,6 +75,10 @@ tele-tourist/
 - **My Stories**: View and manage all your stories at `frontend/my-stories.html`.
 - **Story Details**: Read a full story at `frontend/story.html?id=<story_id>`. Edit and Delete buttons are visible if you are the author.
 
+## Explore / Discovery
+- **Explore Page**: Visit `frontend/explore.html` to discover all public travel stories.
+- **API**: `GET /api/explore/stories` supports query parameters: `search`, `category`, `limit`, and `offset`.
+
 ### Cloudinary Setup
 1. Create a Cloudinary account.
 2. Obtain Cloud Name, API Key, API Secret.

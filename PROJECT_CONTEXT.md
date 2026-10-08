@@ -52,10 +52,10 @@ Note:
 - The User Profile system is implemented. Profile images will be supported in the Cloudinary phase.
 - Travel Stories module is implemented (CRUD operations, ownership validation, categories).
 - Cloudinary is used for travel story images. Images are stored in Cloudinary. `story_images` stores the Cloudinary URL and public ID. Cloudinary API secrets remain server-side.
+- Explore / Discovery module is implemented (Public story discovery, search, category filtering).
 
 ## Future Features
 The following features will be implemented in the future (they are NOT part of the initial foundation):
-- Explore feed
 - Likes
 - Comments
 - Saved stories

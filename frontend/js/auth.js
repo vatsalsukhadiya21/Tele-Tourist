@@ -129,6 +129,7 @@ const Auth = {
 
         if (this.isAuthenticated()) {
             authLinks.innerHTML = `
+                <li class="nav-item"><a class="nav-link" href="explore.html">Explore</a></li>
                 <li class="nav-item"><a class="nav-link" href="create-story.html">Create Story</a></li>
                 <li class="nav-item"><a class="nav-link" href="my-stories.html">My Stories</a></li>
                 <li class="nav-item"><a class="nav-link" href="profile.html">Profile</a></li>
@@ -142,6 +143,7 @@ const Auth = {
             });
         } else {
             authLinks.innerHTML = `
+                <li class="nav-item"><a class="nav-link" href="explore.html">Explore</a></li>
                 <li class="nav-item"><a class="nav-link" href="login.html">Login</a></li>
                 <li class="nav-item"><a class="nav-link" href="register.html">Sign Up</a></li>
             `;

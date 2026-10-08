@@ -47,3 +47,10 @@ Inside `backend/src/`, the server logic is divided into specific folders based o
 - `frontend/create-story.html`: Interface for writing and editing stories, selecting images, and previewing thumbnails.
 - `frontend/story.html`: Displays the details of a single story and author information along with an image gallery and deletion controls.
 - `frontend/my-stories.html`: A dashboard showing all stories authored by the logged-in user.
+
+## Explore Components
+
+- `backend/src/routes/exploreRoutes.js`: Maps explore endpoints (`GET /stories`).
+- `backend/src/controllers/exploreController.js`: Handles fetching, searching, and filtering public stories.
+- `frontend/js/explore.js`: Frontend logic for fetching explore data, search interaction, and UI rendering.
+- `frontend/explore.html`: The public discovery page showcasing travel stories with search and category filters.
