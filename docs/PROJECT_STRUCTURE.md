@@ -37,9 +37,13 @@ Inside `backend/src/`, the server logic is divided into specific folders based o
 
 ## Story Components
 
-- `backend/src/routes/storyRoutes.js`: Maps story endpoints for CRUD operations.
+- `backend/src/routes/storyRoutes.js`: Maps story endpoints for CRUD operations and nested image upload routes.
 - `backend/src/controllers/storyController.js`: Handles creating, retrieving, updating, deleting stories and enforcing ownership securely.
-- `frontend/js/stories.js`: Frontend API wrapper and logic for story-related features.
-- `frontend/create-story.html`: Interface for writing and editing stories.
-- `frontend/story.html`: Displays the details of a single story and author information.
+- `backend/src/routes/storyImageRoutes.js`: Maps nested image endpoints.
+- `backend/src/controllers/storyImageController.js`: Handles uploading images to Cloudinary, database tracking, cleanup, and deleting specific story images.
+- `backend/src/config/cloudinary.js`: Cloudinary Node.js SDK configuration.
+- `backend/src/middleware/uploadMiddleware.js`: Multer configuration for memory storage, type/size validation, and limits.
+- `frontend/js/stories.js`: Frontend API wrapper and logic for story-related features and image upload via FormData.
+- `frontend/create-story.html`: Interface for writing and editing stories, selecting images, and previewing thumbnails.
+- `frontend/story.html`: Displays the details of a single story and author information along with an image gallery and deletion controls.
 - `frontend/my-stories.html`: A dashboard showing all stories authored by the logged-in user.

@@ -129,6 +129,23 @@ CREATE POLICY "Users can delete their own stories."
   ON stories FOR DELETE
   USING (auth.uid() = user_id);
 
+-- RLS Policies for story_images
+CREATE POLICY "Story images are viewable by everyone."
+  ON story_images FOR SELECT
+  USING (true);
+
+CREATE POLICY "Users can insert images to their own stories."
+  ON story_images FOR INSERT
+  WITH CHECK (
+    EXISTS (SELECT 1 FROM stories WHERE id = story_id AND user_id = auth.uid())
+  );
+
+CREATE POLICY "Users can delete images from their own stories."
+  ON story_images FOR DELETE
+  USING (
+    EXISTS (SELECT 1 FROM stories WHERE id = story_id AND user_id = auth.uid())
+  );
+
 -- Insert predefined categories
 INSERT INTO categories (name) VALUES 
 ('Adventure'),

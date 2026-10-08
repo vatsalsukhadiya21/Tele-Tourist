@@ -88,6 +88,39 @@ const StoryAPI = {
             console.error('Error deleting story:', error);
             return { success: false, message: 'Network error' };
         }
+    },
+
+    async uploadImages(storyId, formData) {
+        const token = Auth.getToken();
+        if (!token) return { success: false, message: 'Not authenticated' };
+
+        try {
+            const response = await fetch(`${API_URL}/stories/${storyId}/images`, {
+                method: 'POST',
+                headers: { 'Authorization': `Bearer ${token}` },
+                body: formData // Don't set Content-Type header when sending FormData
+            });
+            return await response.json();
+        } catch (error) {
+            console.error('Error uploading images:', error);
+            return { success: false, message: 'Network error' };
+        }
+    },
+
+    async deleteStoryImage(storyId, imageId) {
+        const token = Auth.getToken();
+        if (!token) return { success: false, message: 'Not authenticated' };
+
+        try {
+            const response = await fetch(`${API_URL}/stories/${storyId}/images/${imageId}`, {
+                method: 'DELETE',
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            return await response.json();
+        } catch (error) {
+            console.error('Error deleting image:', error);
+            return { success: false, message: 'Network error' };
+        }
     }
 };
 

@@ -50,11 +50,11 @@ Note:
 - Passwords are managed by Supabase and are not stored in the `profiles` table.
 - Supabase access tokens are used to authorize protected backend requests.
 - The User Profile system is implemented. Profile images will be supported in the Cloudinary phase.
-- Travel Stories module is implemented (CRUD operations, ownership validation, categories). Image uploads are deferred.
+- Travel Stories module is implemented (CRUD operations, ownership validation, categories).
+- Cloudinary is used for travel story images. Images are stored in Cloudinary. `story_images` stores the Cloudinary URL and public ID. Cloudinary API secrets remain server-side.
 
 ## Future Features
 The following features will be implemented in the future (they are NOT part of the initial foundation):
-- Image uploads (Cloudinary)
 - Explore feed
 - Likes
 - Comments
