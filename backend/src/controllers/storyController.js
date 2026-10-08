@@ -70,13 +70,19 @@ const getStory = async (req, res) => {
             .select(`
                 id, title, description, location, created_at, updated_at,
                 category:categories(id, name),
-                author:profiles(id, full_name, username, profile_image_url)
+                author:profiles(id, full_name, username, profile_image_url),
+                images:story_images(id, image_url, display_order, cloudinary_public_id)
             `)
             .eq('id', id)
             .single();
 
         if (error || !data) {
             return res.status(404).json({ success: false, message: 'Story not found' });
+        }
+        
+        // Sort images correctly
+        if (data.images && data.images.length > 0) {
+            data.images.sort((a, b) => a.display_order - b.display_order);
         }
 
         return res.status(200).json({ success: true, story: data });

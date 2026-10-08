@@ -46,6 +46,12 @@
                                     <option value="" disabled selected>Select a category...</option>
                                 </select>
                             </div>
+                            <div class="mb-3">
+                                <label for="story-images" class="form-label">Story Images</label>
+                                <input class="form-control" type="file" id="story-images" accept="image/jpeg, image/png, image/webp" multiple>
+                                <div class="form-text">Maximum 10 images. Maximum 5 MB per image. Only JPG, PNG, and WEBP allowed.</div>
+                                <div id="image-previews" class="d-flex flex-wrap gap-2 mt-3"></div>
+                            </div>
                             <div class="mb-4">
                                 <label for="story-description" class="form-label">Description</label>
                                 <textarea class="form-control" id="story-description" rows="6" placeholder="Tell travelers about your experience..." required></textarea>
@@ -74,6 +80,10 @@
             const catSelect = document.getElementById('story-category');
             const form = document.getElementById('story-form');
             const msgContainer = document.getElementById('message-container');
+            const imageInput = document.getElementById('story-images');
+            const previewContainer = document.getElementById('image-previews');
+            
+            let selectedFiles = [];
 
             // Load Categories
             const catRes = await StoryAPI.getCategories();
@@ -86,15 +96,64 @@
                 });
             }
 
+            // Image Selection and Preview
+            imageInput.addEventListener('change', (e) => {
+                const files = Array.from(e.target.files);
+                
+                // Add to selected files
+                selectedFiles = [...selectedFiles, ...files];
+                
+                // Enforce 10 files max
+                if (selectedFiles.length > 10) {
+                    alert('You can only select up to 10 images. Extras will be ignored.');
+                    selectedFiles = selectedFiles.slice(0, 10);
+                }
+                
+                renderPreviews();
+                
+                // Reset input so selecting the same file again works
+                imageInput.value = '';
+            });
+
+            function renderPreviews() {
+                previewContainer.innerHTML = '';
+                selectedFiles.forEach((file, index) => {
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        const wrapper = document.createElement('div');
+                        wrapper.className = 'position-relative';
+                        wrapper.style.width = '100px';
+                        wrapper.style.height = '100px';
+                        
+                        wrapper.innerHTML = `
+                            <img src="${e.target.result}" class="img-thumbnail w-100 h-100" style="object-fit: cover;">
+                            <button type="button" class="btn btn-sm btn-danger position-absolute top-0 end-0 m-1 p-0" style="width: 20px; height: 20px; line-height: 1;" data-index="${index}">&times;</button>
+                        `;
+                        
+                        wrapper.querySelector('button').addEventListener('click', () => {
+                            selectedFiles.splice(index, 1);
+                            renderPreviews();
+                        });
+                        
+                        previewContainer.appendChild(wrapper);
+                    };
+                    reader.readAsDataURL(file);
+                });
+            }
+
             // Edit Mode
             if (editId) {
                 titleEl.textContent = 'Edit Story';
                 submitBtn.textContent = 'Update Story';
+                
+                // For editing, we usually don't support appending new images through the same flow or maybe we do,
+                // but the prompt says: "Do NOT require images before a story can be created... The existing flow should remain."
+                // In edit mode, the user can just add more images. Wait, existing images are managed in story.html.
+                // We'll allow uploading more images here too.
 
                 const storyRes = await StoryAPI.getStory(editId);
                 if (storyRes.success && storyRes.story) {
                     const story = storyRes.story;
-                    // Check ownership locally just for UI context
                     const myUser = Auth.getUser();
                     if (myUser && myUser.id !== story.author.id) {
                         window.location.href = 'my-stories.html';
@@ -131,7 +190,27 @@
                 }
 
                 if (res.success) {
-                    window.location.href = `story.html?id=${res.story.id}`;
+                    const finalStoryId = editId || res.story.id;
+                    
+                    if (selectedFiles.length > 0) {
+                        submitBtn.textContent = 'Uploading Images...';
+                        const formData = new FormData();
+                        selectedFiles.forEach(file => {
+                            formData.append('images', file);
+                        });
+                        
+                        const uploadRes = await StoryAPI.uploadImages(finalStoryId, formData);
+                        
+                        if (!uploadRes.success) {
+                            msgContainer.innerHTML = `<div class="alert alert-warning">Story saved, but some images failed to upload: ${uploadRes.message}. Redirecting...</div>`;
+                            setTimeout(() => {
+                                window.location.href = `story.html?id=${finalStoryId}`;
+                            }, 3000);
+                            return;
+                        }
+                    }
+                    
+                    window.location.href = `story.html?id=${finalStoryId}`;
                 } else {
                     msgContainer.innerHTML = `<div class="alert alert-danger">${res.message}</div>`;
                     submitBtn.disabled = false;

@@ -55,6 +55,13 @@
                             </a>
                         </div>
 
+                        <!-- Image Gallery -->
+                        <div id="story-gallery" class="mb-4 d-none">
+                            <div id="main-image-container" class="mb-2"></div>
+                            <div id="thumbnail-container" class="d-flex flex-wrap gap-2"></div>
+                        </div>
+                        <div id="empty-images-state" class="alert alert-secondary text-center mb-4">No travel photos uploaded yet.</div>
+
                         <!-- Content -->
                         <div class="story-content mb-5" id="story-description">
                             Description...
@@ -139,7 +146,70 @@
 
                 // Check ownership
                 const myUser = Auth.getUser();
-                if (myUser && myUser.id === story.author.id) {
+                const isOwner = myUser && myUser.id === story.author.id;
+                
+                // Render Images
+                const gallery = document.getElementById('story-gallery');
+                const emptyState = document.getElementById('empty-images-state');
+                const mainImg = document.getElementById('main-image-container');
+                const thumbs = document.getElementById('thumbnail-container');
+                
+                if (story.images && story.images.length > 0) {
+                    emptyState.classList.add('d-none');
+                    gallery.classList.remove('d-none');
+                    
+                    // Render Main Image
+                    mainImg.innerHTML = `<img src="${story.images[0].image_url}" class="img-fluid rounded w-100" style="max-height: 500px; object-fit: cover;">`;
+                    
+                    // Render Thumbnails
+                    thumbs.innerHTML = '';
+                    story.images.forEach((img, index) => {
+                        const thumbWrapper = document.createElement('div');
+                        thumbWrapper.className = 'position-relative';
+                        thumbWrapper.style.width = '100px';
+                        thumbWrapper.style.height = '100px';
+                        thumbWrapper.id = `img-wrap-${img.id}`;
+                        
+                        let thumbHtml = `<img src="${img.image_url}" class="img-thumbnail w-100 h-100" style="object-fit: cover; cursor: pointer;" onclick="document.querySelector('#main-image-container img').src='${img.image_url}'">`;
+                        
+                        if (isOwner) {
+                            thumbHtml += `<button type="button" class="btn btn-sm btn-danger position-absolute top-0 end-0 m-1 p-0" style="width: 20px; height: 20px; line-height: 1; z-index: 10;" title="Delete Image" onclick="deleteImage('${story.id}', '${img.id}')">&times;</button>`;
+                        }
+                        
+                        thumbWrapper.innerHTML = thumbHtml;
+                        thumbs.appendChild(thumbWrapper);
+                    });
+                } else {
+                    emptyState.classList.remove('d-none');
+                    gallery.classList.add('d-none');
+                }
+
+                // Expose deleteImage function globally for inline onclick
+                window.deleteImage = async (sid, iid) => {
+                    if (confirm('Are you sure you want to delete this image?')) {
+                        const btn = document.querySelector(`#img-wrap-${iid} button`);
+                        if(btn) { btn.disabled = true; btn.innerHTML = '...'; }
+                        
+                        const delRes = await StoryAPI.deleteStoryImage(sid, iid);
+                        if (delRes.success) {
+                            document.getElementById(`img-wrap-${iid}`).remove();
+                            // Update main image if needed, or if no images left
+                            if (thumbs.children.length === 0) {
+                                emptyState.classList.remove('d-none');
+                                gallery.classList.add('d-none');
+                            } else {
+                                // Default to first remaining thumbnail
+                                const firstImgUrl = thumbs.querySelector('img').src;
+                                document.querySelector('#main-image-container img').src = firstImgUrl;
+                            }
+                        } else {
+                            alert(delRes.message);
+                            if(btn) { btn.disabled = false; btn.innerHTML = '&times;'; }
+                        }
+                    }
+                };
+
+                if (isOwner) {
                     document.getElementById('owner-controls').classList.remove('d-none');
                     document.getElementById('edit-btn').href = `create-story.html?edit=${story.id}`;
                     
